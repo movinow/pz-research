@@ -617,7 +617,7 @@ function render() {
       }
       const detailCols = (ROOM_MODE ? 6 : 9) + (HAS_NAMES ? 1 : 0);
       const imgSrc = IMAGES && IMAGES[d.idx];
-      const imgHtml = imgSrc ? `<img class="store-image" src="${imgSrc}" loading="lazy" onclick="window.open(this.src,'_blank')" title="クリックで拡大">` : '';
+      const imgHtml = imgSrc ? `<img class="store-image" src="${imgSrc}" loading="lazy">` : '';
       rows.push(`<tr class="detail-row" data-parent="${d.idx}">
         <td colspan="${detailCols}">
           <div class="detail-content">
