@@ -281,6 +281,60 @@ tr.detail-row td {
   width: 100%;
   border: none;
 }
+.map-overlay-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+.map-pin {
+  position: absolute;
+  width: 22px; height: 22px;
+  margin-left: -11px; margin-top: -11px;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  z-index: 5;
+  transition: background 0.12s, box-shadow 0.12s;
+}
+.map-pin:hover {
+  background: rgba(255,255,255,0.25);
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.4);
+}
+.map-pin .pin-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.88);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
+.map-pin .pin-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -4px;
+  border: 4px solid transparent;
+  border-top-color: rgba(0,0,0,0.88);
+}
+.map-pin:hover .pin-tip { display: block; }
+.map-pin.pin-top .pin-tip {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+.map-pin.pin-top .pin-tip::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: rgba(0,0,0,0.88);
+}
 </style>
 </head>
 <body>
@@ -298,9 +352,11 @@ tr.detail-row td {
   
   <details class="overview-map-section" open>
     <summary>全体マップ（クリックで開閉）</summary>
-    <img class="overview-map" src="bookstore_images/bookstore_map_overview.png"
-         alt="書店位置マップ" loading="lazy"
-         onclick="window.open(this.src,'_blank')" title="クリックで拡大">
+    <div class="map-overlay-wrap" id="mapOverlay">
+      <img class="overview-map" src="bookstore_images/bookstore_map_overview.png"
+           alt="書店位置マップ" loading="lazy"
+           onclick="window.open(this.src,'_blank')" title="クリックで拡大">
+    </div>
   </details>
 
   <div class="filters">
@@ -630,6 +686,45 @@ document.getElementById('checkAll').addEventListener('change', function() {
 });
 
 render();
+
+// Map overlay markers (% positions on overview image)
+const PIN_POS = [
+  [2.97,13.80],[17.59,8.33],[29.04,17.22],[23.34,26.30],[17.69,35.46],
+  [26.80,38.70],[38.79,33.52],[48.20,46.76],[52.24,45.83],[46.20,52.31],
+  [51.75,50.37],[54.82,48.89],[60.04,51.76],[42.50,64.91],[55.36,56.11],
+  [59.60,53.52],[43.52,69.81],[60.28,56.11],[45.71,34.63],[46.49,35.93]
+];
+(function renderPins() {
+  const wrap = document.getElementById('mapOverlay');
+  if (!wrap) return;
+  PIN_POS.forEach(([x, y], i) => {
+    const idx = i + 1;
+    const d = DATA[i];
+    const name = d.name || '(名称不明)';
+    const pin = document.createElement('div');
+    pin.className = 'map-pin' + (y < 15 ? ' pin-top' : '');
+    pin.style.left = x + '%';
+    pin.style.top = y + '%';
+    pin.innerHTML = `<span class="pin-tip">${idx}. ${name} — ${d.town}</span>`;
+    pin.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const row = document.querySelector(`tr.main-row[data-ridx="${idx}"]`);
+      if (!row) return;
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const detail = document.querySelector(`tr.detail-row[data-parent="${idx}"]`);
+      const icon = row.querySelector('.expand-icon');
+      if (detail && !detail.classList.contains('open')) {
+        detail.classList.add('open');
+        if (icon) icon.classList.add('open');
+      }
+      const prev = document.querySelector('tr.visited');
+      if (prev) prev.classList.remove('visited');
+      row.classList.add('visited');
+      visitedIdx = idx;
+    });
+    wrap.appendChild(pin);
+  });
+})();
 </script>
 </body>
 </html>
