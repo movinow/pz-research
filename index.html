@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>書店一覧</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic Medium', 'Meiryo',
+               'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.95);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.header { text-align: center; margin-bottom: 20px; }
+.header h1 {
+  color: #2c3e50;
+  margin-bottom: 8px;
+  font-size: 1.8rem;
+}
+.header p { color: #7f8c8d; font-size: 0.95rem; }
+.stats {
+  display: flex; justify-content: center; gap: 12px;
+  flex-wrap: wrap; margin-top: 12px;
+}
+.stat-badge {
+  background: #ecf0f1; border-radius: 20px;
+  padding: 4px 14px; font-size: 0.85rem; color: #555;
+}
+.stat-badge strong { color: #2c3e50; }
+.filters {
+  display: flex; gap: 10px; margin: 16px 0;
+  flex-wrap: wrap; align-items: center;
+}
+.filters label { font-size: 0.85rem; color: #555; font-weight: 600; }
+.filter-btn {
+  padding: 5px 12px; border-radius: 16px;
+  border: 1px solid #ddd; background: #fff;
+  font-size: 0.82rem; cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { background: #ecf0f1; }
+.filter-btn.active { background: #2c3e50; color: #fff; border-color: #2c3e50; }
+.filter-count {
+  font-size: 0.7rem; margin-left: 3px; opacity: 0.7;
+}
+.search-box {
+  flex: 1; min-width: 180px;
+  padding: 6px 12px; border-radius: 16px;
+  border: 1px solid #ddd; font-size: 0.85rem;
+  outline: none;
+}
+.search-box:focus { border-color: #3498db; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.85rem; margin-top: 10px;
+}
+th {
+  background: #2c3e50; color: #fff;
+  padding: 8px 10px; text-align: left;
+  font-weight: 600; font-size: 0.8rem;
+  position: sticky; top: 0; z-index: 10;
+  cursor: pointer; user-select: none;
+}
+th:hover { background: #34495e; }
+th .sort-arrow { font-size: 0.65rem; margin-left: 3px; opacity: 0.6; }
+th .sort-arrow.active { opacity: 1; }
+td {
+  padding: 6px 10px; border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+tr:hover { background: #f8f9fa; }
+tr.visited { background: #dce8f0; }
+tr.visited:hover { background: #d0e0ec; }
+.facility-tag {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 10px; font-size: 0.75rem;
+  color: #fff; font-weight: 600;
+}
+.unverified-badge {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 10px; font-size: 0.7rem;
+  background: #fff3cd; color: #856404;
+  font-weight: 600; border: 1px solid #ffc107;
+}
+.high-level {
+  display: inline-block; padding: 1px 7px;
+  border-radius: 10px; font-size: 0.75rem;
+  background: #e8f4fd; color: #1565c0;
+  font-weight: 700; border: 1px solid #90caf9;
+}
+.room-list {
+  font-size: 0.78rem; color: #555;
+  max-width: 250px;
+}
+.map-link {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px; border-radius: 6px;
+  background: #ebf5fb; border: 1px solid #d4e6f1;
+  color: #2980b9; text-decoration: none;
+  font-size: 0.82rem; font-weight: 600;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.map-link:hover { background: #d4e6f1; }
+.map-link-arrow { font-size: 0.65rem; margin-left: 3px; color: #7fb3d3; }
+.result-count {
+  font-size: 0.85rem; color: #7f8c8d; margin: 10px 0;
+}
+.no-results {
+  text-align: center; padding: 40px; color: #bbb; font-size: 1rem;
+}
+tr.expandable { cursor: pointer; }
+tr.expandable td:first-child { cursor: default; }
+tr.detail-row { display: none; }
+tr.detail-row.open { display: table-row; }
+tr.detail-row td {
+  padding: 4px 10px 8px 40px;
+  background: #f8f9fa; border-bottom: 1px solid #eee;
+}
+.detail-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.78rem; margin: 2px 0;
+}
+.detail-table th {
+  background: #e8ecef; color: #555; padding: 3px 8px;
+  font-weight: 600; font-size: 0.75rem;
+  position: static; cursor: default;
+}
+.detail-table th:hover { background: #e8ecef; }
+.detail-table td {
+  padding: 3px 8px; border-bottom: 1px solid #e0e0e0;
+  font-size: 0.78rem;
+}
+.detail-table .table-tag {
+  display: inline-block; padding: 1px 6px;
+  border-radius: 8px; background: #ebf5fb;
+  color: #2980b9; font-size: 0.72rem;
+  margin: 1px 2px;
+}
+.expand-icon {
+  display: inline-block; width: 14px;
+  font-size: 0.7rem; color: #999;
+  transition: transform 0.15s;
+  margin-right: 2px;
+}
+.expand-icon.open { transform: rotate(90deg); }
+.score-badge {
+  display: inline-block; padding: 1px 7px;
+  border-radius: 8px; font-size: 0.72rem;
+  font-weight: 600; white-space: nowrap;
+}
+.score-high { background: #d5f5e3; color: #1e8449; }
+.score-mid { background: #fef9e7; color: #b7950b; }
+.score-low { background: #f2f3f4; color: #999; }
+.notice-banner {
+  background: #fef9e7; border: 1px solid #f0d78e;
+  border-radius: 8px; padding: 8px 16px;
+  margin-bottom: 16px; font-size: 0.85rem;
+  color: #856404;
+}
+.score-bar {
+  display: inline-block; height: 6px; border-radius: 3px;
+  vertical-align: middle; margin-right: 5px;
+  min-width: 2px; max-width: 60px;
+}
+.overview-map-section {
+  margin: 16px 0;
+  text-align: center;
+}
+.overview-map-section summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 8px 0;
+  user-select: none;
+}
+.overview-map-section summary:hover { color: #3498db; }
+.overview-map {
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.overview-map:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+.store-image {
+  max-width: 420px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.store-image:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.detail-content {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.detail-content .detail-table {
+  flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .detail-content { flex-direction: column; }
+  .store-image { max-width: 100%; }
+  body { padding: 10px; }
+  .container { padding: 16px; }
+  .header h1 { font-size: 1.3rem; }
+  table { font-size: 0.78rem; }
+  .room-list { max-width: 120px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>書店一覧</h1>
+    <p>部屋タイプ: bookstore / 全建物</p>
+    <div class="stats">
+      <span class="stat-badge">建物数 <strong id="visibleCount">20</strong>/20</span>
+      
+      <span class="stat-badge" id="checkCount" style="color:#27ae60;font-weight:600"></span>
+    </div>
+  </div>
+  
+  <details class="overview-map-section" open>
+    <summary>全体マップ（クリックで開閉）</summary>
+    <img class="overview-map" src="bookstore_images/bookstore_map_overview.png"
+         alt="書店位置マップ" loading="lazy"
+         onclick="window.open(this.src,'_blank')" title="クリックで拡大">
+  </details>
+
+  <div class="filters">
+    
+    <input type="text" class="search-box" id="searchBox" placeholder="部屋タイプ / 街名で検索...">
+    <label style="font-size:0.85rem;color:#555;font-weight:600;margin-left:4px">Zoom</label>
+    <input type="range" id="zoomRange" min="1" max="18" value="5" style="width:80px;vertical-align:middle">
+    <span id="zoomVal" style="font-size:0.82rem;color:#555;min-width:18px;display:inline-block">5</span>
+  </div>
+  <div class="result-count" id="resultCount"></div>
+  <table>
+    <thead>
+      <tr>
+        <th style="cursor:default;width:30px"><input type="checkbox" id="checkAll" title="全選択/解除"></th>
+        <th data-sort="idx">#</th>
+        
+        <th data-sort="town">街</th>
+        <th data-sort="name">店舗名</th>
+        <th data-sort="coord">座標</th>
+        <th data-sort="level">階層</th>
+        <th>対象部屋</th>
+        
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="no-results" id="noResults" style="display:none">条件に一致する建物がありません</div>
+</div>
+<script>
+const DATA = [{"x": 453, "y": 9800, "mx": 453, "my": 9800, "level": "0", "town": "エクロン", "rooms": ["library"], "roomCount": 1, "facility": "other", "details": [{"type": "library", "count": 1, "levels": [0], "tables": [], "score": 0}], "maxScore": 0, "name": "Bookman's Holiday"}, {"x": 2119, "y": 5776, "mx": 2123, "my": 5782, "level": "0", "town": "ブランデンバーグ", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 6433, "y": 5262, "mx": 6438, "my": 5268, "level": "0", "town": "リバーサイド", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Enigma Books"}, {"x": 7253, "y": 8429, "mx": 7257, "my": 8433, "level": "0", "town": "ファラスレイク", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "The Good Book"}, {"x": 8086, "y": 11508, "mx": 8091, "my": 11512, "level": "0", "town": "ローズウッド", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 10606, "y": 10367, "mx": 10611, "my": 10371, "level": "0", "town": "マルドロー", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book store"}, {"x": 11892, "y": 6882, "mx": 11896, "my": 6887, "level": "0", "town": "ウェストポイント", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Enigma Books"}, {"x": 12368, "y": 1507, "mx": 12374, "my": 1511, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 12529, "y": 1248, "mx": 12536, "my": 1258, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 12554, "y": 1927, "mx": 12563, "my": 1933, "level": "0~1", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0, 1], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Bernard's Book Emporium"}, {"x": 12734, "y": 1528, "mx": 12738, "my": 1531, "level": "7", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [7], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 12809, "y": 1306, "mx": 12813, "my": 1312, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Page Turners"}, {"x": 13178, "y": 1250, "mx": 13184, "my": 1252, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 13218, "y": 2972, "mx": 13221, "my": 2976, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 13237, "y": 1652, "mx": 13241, "my": 1659, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 13343, "y": 1279, "mx": 13349, "my": 1288, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Worm of Books"}, {"x": 13378, "y": 3044, "mx": 13382, "my": 3049, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 13515, "y": 1390, "mx": 13525, "my": 1397, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 13601, "y": 5665, "mx": 13607, "my": 5671, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Worm of Books"}, {"x": 13918, "y": 5860, "mx": 13926, "my": 5871, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}];
+const COUNTS = {"other": 19};
+const LABELS = {"police": "警察署", "military": "軍事施設", "tent": "軍事テント", "gunstore": "銃砲店", "hunting": "狩猟用品店", "pawnshop": "質屋", "drug": "ドラッグラボ", "prison": "刑務所", "security": "警備室", "storage": "レンタル倉庫", "other": "その他"};
+const COLORS = {"police": "#2980b9", "military": "#27ae60", "tent": "#52be80", "gunstore": "#e67e22", "hunting": "#8e6e53", "pawnshop": "#8e44ad", "drug": "#c0392b", "prison": "#7f8c8d", "security": "#2c3e50", "storage": "#95a5a6", "other": "#bdc3c7"};
+const TOWN_COUNTS = {"ブランデンバーグ": 1, "リバーサイド": 1, "ファラスレイク": 1, "ローズウッド": 1, "マルドロー": 1, "ウェストポイント": 1, "ルイビル": 13, "エクロン": 1};
+const TOWN_ORDER = {"エクロン": 0, "ブランデンバーグ": 1, "アービントン": 2, "エコークリーク": 3, "リバーサイド": 4, "ファラスレイク": 5, "ローズウッド": 6, "マーチリッジ": 7, "マルドロー": 8, "ウェストポイント": 9, "ルイビル": 10};
+const ROOM_MODE = true;
+const HAS_NAMES = true;
+const IMAGES = [null,
+  "bookstore_images/20_bookmans_holiday_453_9800.png",
+  "bookstore_images/01_book_naked_2126_5794.png",
+  "bookstore_images/02_enigma_books_6437_5266.png",
+  "bookstore_images/03_the_good_book_7257_8433.png",
+  "bookstore_images/04_book_naked_8087_11514.png",
+  "bookstore_images/19_book_store_10611_10366.png",
+  "bookstore_images/05_enigma_books_11895_6890.png",
+  "bookstore_images/06_book_naked_12376_1508.png",
+  "bookstore_images/13_unknown_a_12536_1258.png",
+  "bookstore_images/07_bernards_book_emporium_12551_1930.png",
+  "bookstore_images/14_unknown_b_12738_1531.png",
+  "bookstore_images/15_page_turners_12834_1316.png",
+  "bookstore_images/16_unknown_c_13184_1252.png",
+  "bookstore_images/17_unknown_d_13221_2976.png",
+  "bookstore_images/18_unknown_e_13241_1659.png",
+  "bookstore_images/08_worm_of_books_13344_1296.png",
+  "bookstore_images/09_book_naked_13380_3053.png",
+  "bookstore_images/10_book_naked_13524_1396.png",
+  "bookstore_images/11_worm_of_books_13600_5668.png",
+  "bookstore_images/12_book_naked_13925_5872.png"
+];
+
+let mapWin = null;
+let visitedIdx = null;
+function openMap(x, y, idx, el) {
+  const z = document.getElementById('zoomRange').value;
+  const url = `https://b42map.com/?${x}x${y}x${z}`;
+  if (mapWin && !mapWin.closed) {
+    mapWin.location.href = url;
+    mapWin.focus();
+  } else {
+    mapWin = window.open(url, 'b42map');
+  }
+  // 前の行のハイライトを消す
+  const prev = document.querySelector('tr.visited');
+  if (prev) prev.classList.remove('visited');
+  visitedIdx = idx;
+  const row = el.closest('tr');
+  if (row && !row.style.background) row.classList.add('visited');
+  return false;
+}
+
+function scoreBadge(score) {
+  let cls, label;
+  if (score >= 0.5) { cls = 'score-high'; label = '高 ' + score.toFixed(2); }
+  else if (score >= 0.05) { cls = 'score-mid'; label = '中 ' + score.toFixed(2); }
+  else if (score >= 0.001) { cls = 'score-low'; label = '低 ' + score.toFixed(3); }
+  else { cls = 'score-low'; label = '極低'; }
+  return `<span class="score-badge ${cls}">${label}</span>`;
+}
+
+function fmtScore(v) {
+  if (v >= 0.01) return v.toFixed(2);
+  if (v >= 0.001) return v.toFixed(3);
+  if (v > 0) return '極低';
+  return '';
+}
+
+function scoreBar(expected, maxVal) {
+  if (expected <= 0 || maxVal <= 0) return '<span style="color:#ccc">極低</span>';
+  const w = Math.max(2, Math.min(60, (expected / maxVal) * 60));
+  let color;
+  if (expected >= 0.5) color = '#27ae60';
+  else if (expected >= 0.05) color = '#f39c12';
+  else color = '#bbb';
+  return `<span class="score-bar" style="width:${w}px;background:${color}"></span>${fmtScore(expected)}`;
+}
+
+// 施設フィルタボタン生成
+const btnContainer = document.getElementById('facilityButtons');
+if (btnContainer) {
+  const order = ['police','military','tent','gunstore','hunting','pawnshop','drug','prison','security','storage','other'];
+  for (const f of order) {
+    if (!COUNTS[f]) continue;
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.facility = f;
+    btn.innerHTML = `${LABELS[f]}<span class="filter-count">${COUNTS[f]}</span>`;
+    btn.style.borderColor = COLORS[f];
+    btnContainer.appendChild(btn);
+  }
+}
+
+let activeFilter = 'all';
+let searchQuery = '';
+let sortKey = ROOM_MODE ? 'town' : 'score';
+let sortAsc = ROOM_MODE ? true : false;
+const checkedSet = new Set();
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.facility;
+    render();
+  });
+});
+
+document.getElementById('searchBox').addEventListener('input', e => {
+  searchQuery = e.target.value.toLowerCase();
+  render();
+});
+
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sort;
+    if (sortKey === key) sortAsc = !sortAsc;
+    else { sortKey = key; sortAsc = true; }
+    render();
+  });
+});
+
+function render() {
+  let filtered = DATA.map((d, i) => ({ ...d, idx: i + 1 }));
+
+  if (activeFilter !== 'all') {
+    filtered = filtered.filter(d => d.facility === activeFilter);
+  }
+
+  if (searchQuery) {
+    filtered = filtered.filter(d =>
+      d.rooms.some(r => r.toLowerCase().includes(searchQuery)) ||
+      (d.town || '').toLowerCase().includes(searchQuery) ||
+      (LABELS[d.facility] || '').includes(searchQuery) ||
+      `${d.x},${d.y}`.includes(searchQuery)
+    );
+  }
+
+  // ソート
+  filtered.sort((a, b) => {
+    let va, vb;
+    switch (sortKey) {
+      case 'idx': va = a.idx; vb = b.idx; break;
+      case 'name': va = a.name || 'zzz'; vb = b.name || 'zzz'; break;
+      case 'facility': va = a.facility; vb = b.facility; break;
+      case 'town': va = TOWN_ORDER[a.town] ?? 999; vb = TOWN_ORDER[b.town] ?? 999; break;
+      case 'coord': va = a.x * 100000 + a.y; vb = b.x * 100000 + b.y; break;
+      case 'level': va = a.level; vb = b.level; break;
+      case 'score': va = a.maxScore; vb = b.maxScore; break;
+      default: va = a.idx; vb = b.idx;
+    }
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  // ソート矢印更新
+  document.querySelectorAll('th .sort-arrow').forEach(el => el.remove());
+  const activeTh = document.querySelector(`th[data-sort="${sortKey}"]`);
+  if (activeTh) {
+    const arrow = document.createElement('span');
+    arrow.className = 'sort-arrow active';
+    arrow.textContent = sortAsc ? ' ▲' : ' ▼';
+    activeTh.appendChild(arrow);
+  }
+
+  const tbody = document.getElementById('tbody');
+  const rows = [];
+  for (const d of filtered) {
+    const color = COLORS[d.facility] || '#bbb';
+    const label = LABELS[d.facility] || d.facility;
+    const townLabel = d.town || '<span style="color:#bbb">郊外</span>';
+    const checked = checkedSet.has(d.idx) ? 'checked' : '';
+    const visited = (visitedIdx === d.idx);
+    const hasDetails = d.details && d.details.length > 0;
+    const expandCls = hasDetails ? ' expandable' : '';
+    const visitCls = (!checked && visited) ? ' visited' : '';
+    rows.push(`<tr class="main-row${expandCls}${visitCls}" data-ridx="${d.idx}" style="${checked ? 'background:#eaf7ea' : ''}">
+      <td><input type="checkbox" class="row-check" data-idx="${d.idx}" ${checked}></td>
+      <td>${hasDetails ? '<span class="expand-icon" data-ridx="' + d.idx + '">&#9654;</span>' : ''}${d.idx}</td>
+      ${ROOM_MODE ? '' : `<td><span class="facility-tag" style="background:${color}">${label}</span></td>`}
+      <td>${townLabel}</td>
+      ${HAS_NAMES ? `<td>${d.name ? d.name + (d.unverified ? ' <span class="unverified-badge">未確認</span>' : '') : (d.unverified ? '<span class="unverified-badge">未確認</span>' : '<span style="color:#bbb">—</span>')}</td>` : ''}
+      <td><a class="map-link" href="#" onclick="return openMap(${d.mx},${d.my},${d.idx},this)">${d.mx}, ${d.my}<span class="map-link-arrow">↗</span></a></td>
+      <td>${(() => { const ps = d.level.split('~').map(Number); const mx = Math.max(...ps); return (mx >= 2 || ps.length > 1) ? '<span class="high-level">' + d.level + '階</span>' : ''; })()}</td>
+      <td class="room-list">${d.rooms.join(', ')}</td>
+      ${ROOM_MODE ? '' : `<td>${scoreBadge(d.maxScore)}</td>`}
+    </tr>`);
+    if (hasDetails) {
+      const globalMax = Math.max(...d.details.map(dt => dt.score || 0), 0.001);
+      let dtRows = '';
+      for (const dt of d.details) {
+        const lvStr = dt.levels.length === 1 ? String(dt.levels[0]) : dt.levels[0] + '~' + dt.levels[dt.levels.length - 1];
+        const tbls = dt.tables.map(t => {
+          const ev = t.expected > 0 ? ` <span style="color:#888;font-size:0.68rem">${fmtScore(t.expected)}</span>` : '';
+          return `<span class="table-tag">${t.name}${ev}</span>`;
+        }).join(' ');
+        const barHtml = ROOM_MODE ? '' : scoreBar(dt.score, globalMax);
+        dtRows += `<tr><td>${dt.type}</td><td>${dt.count}</td><td>${lvStr}</td>${ROOM_MODE ? '' : `<td>${tbls}</td><td>${barHtml}</td>`}</tr>`;
+      }
+      const detailCols = (ROOM_MODE ? 6 : 9) + (HAS_NAMES ? 1 : 0);
+      const imgSrc = IMAGES && IMAGES[d.idx];
+      const imgHtml = imgSrc ? `<img class="store-image" src="${imgSrc}" loading="lazy" onclick="window.open(this.src,'_blank')" title="クリックで拡大">` : '';
+      rows.push(`<tr class="detail-row" data-parent="${d.idx}">
+        <td colspan="${detailCols}">
+          <div class="detail-content">
+            ${imgHtml}
+            <table class="detail-table">
+              <thead><tr><th>部屋タイプ</th><th>数</th><th>階層</th>${ROOM_MODE ? '' : '<th>ルートテーブル</th><th>期待値</th>'}</tr></thead>
+              <tbody>${dtRows}</tbody>
+            </table>
+          </div>
+        </td>
+      </tr>`);
+    }
+  }
+  tbody.innerHTML = rows.join('');
+  document.getElementById('visibleCount').textContent = filtered.length;
+  document.getElementById('noResults').style.display = filtered.length ? 'none' : 'block';
+
+  // 展開トグルイベント
+  tbody.querySelectorAll('tr.expandable').forEach(tr => {
+    tr.addEventListener('click', (e) => {
+      if (e.target.closest('input,a')) return;
+      const ridx = tr.dataset.ridx;
+      const detail = tbody.querySelector(`tr.detail-row[data-parent="${ridx}"]`);
+      const icon = tr.querySelector('.expand-icon');
+      if (detail) {
+        detail.classList.toggle('open');
+        if (icon) icon.classList.toggle('open');
+      }
+    });
+  });
+
+  // チェックボックスのイベント
+  tbody.querySelectorAll('.row-check').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const idx = Number(cb.dataset.idx);
+      if (cb.checked) checkedSet.add(idx); else checkedSet.delete(idx);
+      cb.closest('tr').style.background = cb.checked ? '#eaf7ea' : '';
+      updateCheckCount();
+    });
+  });
+  updateCheckCount();
+}
+
+function updateCheckCount() {
+  const el = document.getElementById('checkCount');
+  el.textContent = checkedSet.size ? `${checkedSet.size}件チェック済` : '';
+}
+
+document.getElementById('zoomRange').addEventListener('input', function() {
+  document.getElementById('zoomVal').textContent = this.value;
+});
+
+document.getElementById('checkAll').addEventListener('change', function() {
+  const checked = this.checked;
+  document.querySelectorAll('.row-check').forEach(cb => {
+    cb.checked = checked;
+    const idx = Number(cb.dataset.idx);
+    if (checked) checkedSet.add(idx); else checkedSet.delete(idx);
+    cb.closest('tr').style.background = checked ? '#eaf7ea' : '';
+  });
+  updateCheckCount();
+});
+
+render();
+</script>
+</body>
+</html>
