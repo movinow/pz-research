@@ -690,12 +690,18 @@ const PIN_POS = [
   [72.53,31.13],[73.51,30.67],[74.92,31.65],[69.36,37.19],[73.79,33.10],
   [75.37,32.26],[69.65,37.92],[75.57,33.15],[61.73,46.85],[62.14,48.46]
 ];
+// Louisville inset markers: [dataIndex (0-based), x%, y%]
+const INSET_PIN_POS = [
+  [7,65.33,63.24],[8,70.71,62.04],[9,62.35,70.63],[10,69.77,67.95],
+  [11,73.57,66.15],[12,79.03,69.95],[13,57.54,91.46],[14,74.65,75.58],
+  [15,80.79,72.31],[16,58.68,94.29],[17,81.58,75.76]
+];
 (function renderPins() {
   const wrap = document.getElementById('mapOverlay');
   if (!wrap) return;
-  PIN_POS.forEach(([x, y], i) => {
-    const idx = i + 1;
-    const d = DATA[i];
+  function addPin(x, y, dataIdx) {
+    const idx = dataIdx + 1;
+    const d = DATA[dataIdx];
     const name = d.name || '(名称不明)';
     const pin = document.createElement('div');
     pin.className = 'map-pin' + (y < 15 ? ' pin-top' : '');
@@ -719,7 +725,9 @@ const PIN_POS = [
       visitedIdx = idx;
     });
     wrap.appendChild(pin);
-  });
+  }
+  PIN_POS.forEach(([x, y], i) => addPin(x, y, i));
+  INSET_PIN_POS.forEach(([i, x, y]) => addPin(x, y, i));
 })();
 </script>
 </body>
