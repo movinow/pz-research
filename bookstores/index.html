@@ -192,10 +192,7 @@ tr.detail-row td {
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 8px;
-  cursor: pointer;
-  transition: box-shadow 0.15s;
 }
-.overview-map:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
 .store-image {
   max-width: 420px;
   width: 100%;
@@ -696,11 +693,6 @@ const PIN_POS = [
 (function renderPins() {
   const wrap = document.getElementById('mapOverlay');
   if (!wrap) return;
-  wrap.addEventListener('click', (e) => {
-    if (e.target.classList.contains('overview-map')) {
-      window.open(e.target.src, '_blank');
-    }
-  });
   PIN_POS.forEach(([x, y], i) => {
     const idx = i + 1;
     const d = DATA[i];
