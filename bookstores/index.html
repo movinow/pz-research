@@ -354,8 +354,7 @@ tr.detail-row td {
     <summary>全体マップ（クリックで開閉）</summary>
     <div class="map-overlay-wrap" id="mapOverlay">
       <img class="overview-map" src="bookstore_images/bookstore_map_overview.png"
-           alt="書店位置マップ" loading="lazy"
-           onclick="window.open(this.src,'_blank')">
+           alt="書店位置マップ" loading="lazy">
     </div>
   </details>
 
@@ -697,6 +696,11 @@ const PIN_POS = [
 (function renderPins() {
   const wrap = document.getElementById('mapOverlay');
   if (!wrap) return;
+  wrap.addEventListener('click', (e) => {
+    if (e.target.classList.contains('overview-map')) {
+      window.open(e.target.src, '_blank');
+    }
+  });
   PIN_POS.forEach(([x, y], i) => {
     const idx = i + 1;
     const d = DATA[i];
