@@ -225,6 +225,62 @@ tr.detail-row td {
   table { font-size: 0.78rem; }
   .room-list { max-width: 120px; }
 }
+.map-modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+.map-modal-overlay.open { display: flex; }
+.map-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 92vw; height: 82vh;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+.map-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  flex-shrink: 0;
+}
+.map-modal-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+.map-modal-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.map-modal-newtab {
+  font-size: 0.82rem;
+  color: #2980b9;
+  text-decoration: none;
+}
+.map-modal-newtab:hover { text-decoration: underline; }
+.map-modal-close {
+  background: none; border: none;
+  font-size: 1.4rem; color: #999;
+  cursor: pointer; padding: 0 4px;
+  line-height: 1;
+}
+.map-modal-close:hover { color: #333; }
+.map-modal iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+}
 </style>
 </head>
 <body>
@@ -273,6 +329,18 @@ tr.detail-row td {
   </table>
   <div class="no-results" id="noResults" style="display:none">条件に一致する建物がありません</div>
 </div>
+<div class="map-modal-overlay" id="mapModal">
+  <div class="map-modal">
+    <div class="map-modal-header">
+      <span class="map-modal-title" id="mapModalTitle"></span>
+      <div class="map-modal-actions">
+        <a class="map-modal-newtab" id="mapModalNewtab" href="#" target="_blank">新しいタブで開く</a>
+        <button class="map-modal-close" id="mapModalClose" title="閉じる">&times;</button>
+      </div>
+    </div>
+    <iframe id="mapModalFrame" src="about:blank" allow="fullscreen"></iframe>
+  </div>
+</div>
 <script>
 const DATA = [{"x": 453, "y": 9800, "mx": 453, "my": 9800, "level": "0", "town": "エクロン", "rooms": ["library"], "roomCount": 1, "facility": "other", "details": [{"type": "library", "count": 1, "levels": [0], "tables": [], "score": 0}], "maxScore": 0, "name": "Bookman's Holiday"}, {"x": 2119, "y": 5776, "mx": 2123, "my": 5782, "level": "0", "town": "ブランデンバーグ", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 6433, "y": 5262, "mx": 6438, "my": 5268, "level": "0", "town": "リバーサイド", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Enigma Books"}, {"x": 7253, "y": 8429, "mx": 7257, "my": 8433, "level": "0", "town": "ファラスレイク", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "The Good Book"}, {"x": 8086, "y": 11508, "mx": 8091, "my": 11512, "level": "0", "town": "ローズウッド", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 10606, "y": 10367, "mx": 10611, "my": 10371, "level": "0", "town": "マルドロー", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book store"}, {"x": 11892, "y": 6882, "mx": 11896, "my": 6887, "level": "0", "town": "ウェストポイント", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Enigma Books"}, {"x": 12368, "y": 1507, "mx": 12374, "my": 1511, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 12529, "y": 1248, "mx": 12536, "my": 1258, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 12554, "y": 1927, "mx": 12563, "my": 1933, "level": "0~1", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0, 1], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Bernard's Book Emporium"}, {"x": 12734, "y": 1528, "mx": 12738, "my": 1531, "level": "7", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [7], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 12809, "y": 1306, "mx": 12813, "my": 1312, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Page Turners"}, {"x": 13178, "y": 1250, "mx": 13184, "my": 1252, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 13218, "y": 2972, "mx": 13221, "my": 2976, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 13237, "y": 1652, "mx": 13241, "my": 1659, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": ""}, {"x": 13343, "y": 1279, "mx": 13349, "my": 1288, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Worm of Books"}, {"x": 13378, "y": 3044, "mx": 13382, "my": 3049, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 2, "facility": "other", "details": [{"type": "bookstore", "count": 2, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 13515, "y": 1390, "mx": 13525, "my": 1397, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}, {"x": 13601, "y": 5665, "mx": 13607, "my": 5671, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Worm of Books"}, {"x": 13918, "y": 5860, "mx": 13926, "my": 5871, "level": "0", "town": "ルイビル", "rooms": ["bookstore"], "roomCount": 1, "facility": "other", "details": [{"type": "bookstore", "count": 1, "levels": [0], "tables": [], "score": 0.0}], "maxScore": 0.0, "name": "Book Naked"}];
 const COUNTS = {"other": 19};
@@ -307,14 +375,28 @@ const IMAGES = [null,
 
 let mapWin = null;
 let visitedIdx = null;
+const mapModal = document.getElementById('mapModal');
+const mapFrame = document.getElementById('mapModalFrame');
+const mapTitle = document.getElementById('mapModalTitle');
+const mapNewtab = document.getElementById('mapModalNewtab');
+
 function openMap(x, y, idx, el) {
   const z = document.getElementById('zoomRange').value;
   const url = `https://b42map.com/?${x}x${y}x${z}`;
-  if (mapWin && !mapWin.closed) {
-    mapWin.location.href = url;
-    mapWin.focus();
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    if (mapWin && !mapWin.closed) {
+      mapWin.location.href = url;
+      mapWin.focus();
+    } else {
+      mapWin = window.open(url, 'b42map');
+    }
   } else {
-    mapWin = window.open(url, 'b42map');
+    mapFrame.src = url;
+    mapTitle.textContent = `${x}, ${y}`;
+    mapNewtab.href = url;
+    mapModal.classList.add('open');
   }
   // 前の行のハイライトを消す
   const prev = document.querySelector('tr.visited');
@@ -324,6 +406,14 @@ function openMap(x, y, idx, el) {
   if (row && !row.style.background) row.classList.add('visited');
   return false;
 }
+
+function closeMapModal() {
+  mapModal.classList.remove('open');
+  mapFrame.src = 'about:blank';
+}
+document.getElementById('mapModalClose').addEventListener('click', closeMapModal);
+mapModal.addEventListener('click', (e) => { if (e.target === mapModal) closeMapModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && mapModal.classList.contains('open')) closeMapModal(); });
 
 function scoreBadge(score) {
   let cls, label;
