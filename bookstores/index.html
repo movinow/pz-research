@@ -195,11 +195,25 @@ tr.detail-row td {
   user-select: none;
 }
 .overview-map-section summary:hover { color: #3498db; }
-.usage-hint {
+.map-hint {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.7);
+  background: rgba(0,0,0,0.45);
+  padding: 3px 12px;
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 6;
+}
+.table-hint {
+  text-align: center;
   font-size: 0.78rem;
   color: #95a5a6;
-  text-align: center;
-  margin: 8px 0 4px;
+  padding: 4px 0 !important;
+  border-bottom: none !important;
 }
 .overview-map {
   max-width: 100%;
@@ -367,10 +381,9 @@ tr.detail-row td {
     <div class="map-overlay-wrap" id="mapOverlay">
       <img class="overview-map" src="bookstore_images/bookstore_map_overview.png"
            alt="書店位置マップ" loading="lazy">
+      <span class="map-hint">マーカーをクリックで詳細へ移動</span>
     </div>
   </details>
-
-  <p class="usage-hint">マップのマーカーをクリックで詳細へ移動 / テーブル行クリックで詳細を展開 / 座標クリックでマップを表示</p>
 
   <div class="filters">
     
@@ -394,6 +407,7 @@ tr.detail-row td {
         
       </tr>
     </thead>
+    <tbody><tr><td colspan="7" class="table-hint">行クリックで詳細を展開 / 座標クリックでマップを表示</td></tr></tbody>
     <tbody id="tbody"></tbody>
   </table>
   <div class="no-results" id="noResults" style="display:none">条件に一致する建物がありません</div>
