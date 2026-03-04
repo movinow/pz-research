@@ -684,11 +684,10 @@ document.getElementById('checkAll').addEventListener('change', function() {
 render();
 
 // Map overlay markers (% positions on overview image)
+// Main map markers: stores 1-7 only (Louisville stores use inset below)
 const PIN_POS = [
   [4.53,18.52],[23.34,11.11],[39.33,23.06],[31.58,35.58],[24.17,47.88],
-  [36.28,52.21],[52.05,45.30],[71.39,29.91],[72.78,29.60],[70.62,31.82],
-  [72.53,31.13],[73.51,30.67],[74.92,31.65],[69.36,37.19],[73.79,33.10],
-  [75.37,32.26],[69.65,37.92],[75.57,33.15],[61.73,46.85],[62.14,48.46]
+  [36.28,52.21],[52.05,45.30]
 ];
 // Louisville inset markers: [dataIndex (0-based), x%, y%]
 const INSET_PIN_POS = [
