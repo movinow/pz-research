@@ -729,15 +729,15 @@ const INSET_PIN_POS = [
       // Remove previous back-to-map links, then inject one into this detail
       document.querySelectorAll('.back-to-map').forEach(el => el.remove());
       if (detail) {
-        const content = detail.querySelector('.detail-content');
-        if (content && !content.querySelector('.back-to-map')) {
+        const td = detail.querySelector('td');
+        if (td) {
           const link = document.createElement('a');
           link.className = 'back-to-map';
           link.textContent = '\u2190 マップに戻る';
           link.addEventListener('click', () => {
             document.getElementById('mapOverlay').scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
-          content.insertBefore(link, content.firstChild);
+          td.insertBefore(link, td.firstChild);
         }
       }
       const prev = document.querySelector('tr.visited');
