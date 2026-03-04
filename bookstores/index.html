@@ -392,7 +392,7 @@ tr.detail-row td {
         <th style="cursor:default;font-size:0.72rem;color:#95a5a6;font-weight:400" colspan="2">行クリックで詳細を展開</th>
         <th data-sort="town">街</th>
         <th data-sort="name">店舗名</th>
-        <th data-sort="coord">座標（クリックでマップを表示）</th>
+        <th data-sort="coord">座標 <span style="font-size:0.72rem;color:#95a5a6;font-weight:400">（クリックでマップを表示）</span></th>
         <th data-sort="level">階層</th>
         <th>対象部屋</th>
       </tr>
@@ -690,7 +690,8 @@ document.getElementById('zoomRange').addEventListener('input', function() {
   document.getElementById('zoomVal').textContent = this.value;
 });
 
-document.getElementById('checkAll').addEventListener('change', function() {
+const checkAllEl = document.getElementById('checkAll');
+if (checkAllEl) checkAllEl.addEventListener('change', function() {
   const checked = this.checked;
   document.querySelectorAll('.row-check').forEach(cb => {
     cb.checked = checked;
