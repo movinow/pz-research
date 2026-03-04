@@ -736,6 +736,11 @@ const INSET_PIN_POS = [
           link.className = 'back-to-map';
           link.textContent = '\u2190 マップに戻る';
           link.addEventListener('click', () => {
+            detail.classList.remove('open');
+            const ic = row.querySelector('.expand-icon');
+            if (ic) ic.classList.remove('open');
+            row.classList.remove('visited');
+            link.remove();
             document.getElementById('mapOverlay').scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
           td.insertBefore(link, td.firstChild);
