@@ -80,8 +80,6 @@ td {
   vertical-align: middle;
 }
 tr:hover { background: #f8f9fa; }
-tr.visited { background: #dce8f0; }
-tr.visited:hover { background: #d0e0ec; }
 .facility-tag {
   display: inline-block; padding: 2px 8px;
   border-radius: 10px; font-size: 0.75rem;
@@ -446,7 +444,6 @@ const IMAGES = [null,
 ];
 
 let mapWin = null;
-let visitedIdx = null;
 const mapModal = document.getElementById('mapModal');
 const mapFrame = document.getElementById('mapModalFrame');
 const mapTitle = document.getElementById('mapModalTitle');
@@ -470,12 +467,6 @@ function openMap(x, y, idx, el) {
     mapNewtab.href = url;
     mapModal.classList.add('open');
   }
-  // 前の行のハイライトを消す
-  const prev = document.querySelector('tr.visited');
-  if (prev) prev.classList.remove('visited');
-  visitedIdx = idx;
-  const row = el.closest('tr');
-  if (row && !row.style.background) row.classList.add('visited');
   return false;
 }
 
@@ -608,11 +599,9 @@ function render() {
     const label = LABELS[d.facility] || d.facility;
     const townLabel = d.town || '<span style="color:#bbb">郊外</span>';
     const checked = checkedSet.has(d.idx) ? 'checked' : '';
-    const visited = (visitedIdx === d.idx);
     const hasDetails = d.details && d.details.length > 0;
     const expandCls = hasDetails ? ' expandable' : '';
-    const visitCls = (!checked && visited) ? ' visited' : '';
-    rows.push(`<tr class="main-row${expandCls}${visitCls}" data-ridx="${d.idx}" style="${checked ? 'background:#eaf7ea' : ''}">
+    rows.push(`<tr class="main-row${expandCls}" data-ridx="${d.idx}" style="${checked ? 'background:#eaf7ea' : ''}">
       <td><input type="checkbox" class="row-check" data-idx="${d.idx}" ${checked}></td>
       <td>${hasDetails ? '<span class="expand-icon" data-ridx="' + d.idx + '">&#9654;</span>' : ''}${d.idx}</td>
       ${ROOM_MODE ? '' : `<td><span class="facility-tag" style="background:${color}">${label}</span></td>`}
@@ -751,17 +740,12 @@ const INSET_PIN_POS = [
             detail.classList.remove('open');
             const ic = row.querySelector('.expand-icon');
             if (ic) ic.classList.remove('open');
-            row.classList.remove('visited');
             link.remove();
             document.getElementById('mapOverlay').scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
           td.insertBefore(link, td.firstChild);
         }
       }
-      const prev = document.querySelector('tr.visited');
-      if (prev) prev.classList.remove('visited');
-      row.classList.add('visited');
-      visitedIdx = idx;
     });
     wrap.appendChild(pin);
   }
