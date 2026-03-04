@@ -80,6 +80,8 @@ td {
   vertical-align: middle;
 }
 tr:hover { background: #f8f9fa; }
+tr.expanded { background: #edf6ff; }
+tr.expanded:hover { background: #e3f0fc; }
 .facility-tag {
   display: inline-block; padding: 2px 8px;
   border-radius: 10px; font-size: 0.75rem;
@@ -656,6 +658,7 @@ function render() {
       if (detail) {
         detail.classList.toggle('open');
         if (icon) icon.classList.toggle('open');
+        tr.classList.toggle('expanded', detail.classList.contains('open'));
       }
     });
   });
@@ -729,6 +732,7 @@ const INSET_PIN_POS = [
       if (detail && !detail.classList.contains('open')) {
         detail.classList.add('open');
         if (icon) icon.classList.add('open');
+        row.classList.add('expanded');
       }
       // Remove previous back-to-map links, then inject one into this detail
       document.querySelectorAll('.back-to-map').forEach(el => el.remove());
@@ -742,6 +746,7 @@ const INSET_PIN_POS = [
             detail.classList.remove('open');
             const ic = row.querySelector('.expand-icon');
             if (ic) ic.classList.remove('open');
+            row.classList.remove('expanded');
             link.remove();
             document.getElementById('mapOverlay').scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
