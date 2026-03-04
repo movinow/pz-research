@@ -208,13 +208,6 @@ tr.detail-row td {
   pointer-events: none;
   z-index: 6;
 }
-.table-hint {
-  text-align: center;
-  font-size: 0.78rem;
-  color: #95a5a6;
-  padding: 4px 0 !important;
-  border-bottom: none !important;
-}
 .overview-map {
   max-width: 100%;
   border-radius: 10px;
@@ -396,18 +389,14 @@ tr.detail-row td {
   <table>
     <thead>
       <tr>
-        <th style="cursor:default;width:30px"><input type="checkbox" id="checkAll" title="全選択/解除"></th>
-        <th data-sort="idx">#</th>
-        
+        <th style="cursor:default;font-size:0.72rem;color:#95a5a6;font-weight:400" colspan="2">行クリックで詳細を展開</th>
         <th data-sort="town">街</th>
         <th data-sort="name">店舗名</th>
-        <th data-sort="coord">座標</th>
+        <th data-sort="coord">座標（クリックでマップを表示）</th>
         <th data-sort="level">階層</th>
         <th>対象部屋</th>
-        
       </tr>
     </thead>
-    <tbody><tr><td colspan="7" class="table-hint">行クリックで詳細を展開 / 座標クリックでマップを表示</td></tr></tbody>
     <tbody id="tbody"></tbody>
   </table>
   <div class="no-results" id="noResults" style="display:none">条件に一致する建物がありません</div>
