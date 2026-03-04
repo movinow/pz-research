@@ -463,7 +463,9 @@ function openMap(x, y, idx, el) {
     }
   } else {
     mapFrame.src = url;
-    mapTitle.textContent = `${x}, ${y}`;
+    const d = DATA[idx - 1];
+    const label = d ? `${d.town} ${d.name || ''} (${x}, ${y})`.trim() : `${x}, ${y}`;
+    mapTitle.textContent = label;
     mapNewtab.href = url;
     mapModal.classList.add('open');
   }
